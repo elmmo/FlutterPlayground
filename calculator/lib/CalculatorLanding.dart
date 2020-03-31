@@ -18,16 +18,19 @@ class CalculatorState extends State<CalculatorLanding>{
       body: Column(
         children: <Widget>[
           Expanded( // fills the rest of the space not taken up by the buttons
-            // stack lays widgets on top of each other 
-            child: Stack(
-              children: <Widget>[
-                Container(  // bottom widget - background 
-                  color: themeColor[50]
-                ), 
-                Text(_evalStmt)
-              ]
-            )
-          ),
+            child: Container(
+              color: themeColor[50],
+              padding: const EdgeInsets.fromLTRB(0, 0, 30, 20),
+              child: Align(
+                alignment: Alignment.bottomRight, 
+                child: Container( 
+                  height: 50, 
+                  //color: Colors.amber[600], 
+                  child: Text(_evalStmt)
+                  )
+                )
+              )
+            ),
           CalculatorFormatting.getCalcButtonLayout(themeColor, updateEvaluation)
         ]
       )

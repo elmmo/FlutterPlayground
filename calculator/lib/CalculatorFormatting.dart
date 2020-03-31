@@ -23,8 +23,7 @@ class CalculatorFormatting {
       (GridView.count(
           primary: false,
           shrinkWrap: true,
-          padding: const EdgeInsets.fromLTRB(
-            10, 10, 10, 40), // padding around main container (grid)
+          padding: const EdgeInsets.fromLTRB(10, 10, 10, 40), // padding around main container (grid)
           crossAxisSpacing: 3, // space between the columns
           mainAxisSpacing: 3, // space between the rows
           crossAxisCount: 4, // number of items per row / num of columns
