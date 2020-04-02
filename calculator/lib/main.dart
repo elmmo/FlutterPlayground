@@ -27,3 +27,4 @@ class Calculator extends StatelessWidget {
   // randomly select the base color used for the calculator 
   MaterialColor getThemeColor() => prettyColors[new Random().nextInt(prettyColors.length)];
 }
+

@@ -9,6 +9,7 @@ class CalculatorLanding extends StatefulWidget {
 class CalculatorState extends State<CalculatorLanding>{
   bool _evaluate = false;
   String _evalStmt = "";  
+  List<String> entries = new List();
 
   @override 
   Widget build(BuildContext context) { 
@@ -20,14 +21,32 @@ class CalculatorState extends State<CalculatorLanding>{
           Expanded( // fills the rest of the space not taken up by the buttons
             child: Container(
               color: themeColor[50],
-              padding: const EdgeInsets.fromLTRB(0, 0, 30, 20),
-              child: Align(
-                alignment: Alignment.bottomRight, 
-                child: Container( 
-                  height: 50, 
-                  //color: Colors.amber[600], 
-                  child: Text(_evalStmt)
-                  )
+              padding: const EdgeInsets.fromLTRB(30, 0, 30, 20),
+              child: Column(
+                children: <Widget>[
+                  Expanded(
+                    child: ListView.builder(
+                      primary: false,
+                      itemCount: entries.length,
+                      itemBuilder: (BuildContext context, int index) =>
+                        Container(
+                          height: 50, 
+                          child: Align(
+                            alignment: Alignment.centerRight,
+                            child: Text(entries[index], style: TextStyle(color: Colors.black.withOpacity(0.5)))
+                          )
+                        )
+                    )
+                  ),
+                  Align(
+                    alignment: Alignment.bottomRight, 
+                    child: Container( 
+                      height: 50,
+                      color: Colors.amber[600], 
+                      child: Text(_evalStmt)
+                    )
+                  ),
+                ]
                 )
               )
             ),
@@ -50,6 +69,8 @@ class CalculatorState extends State<CalculatorLanding>{
       break; 
       // if token indicates evaluation 
       case "=": {
+        entries.add(_evalStmt + "=");
+        print(_evalStmt);
         setState(() {
           _evaluate = true; 
           _evalStmt = "0";
