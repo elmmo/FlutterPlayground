@@ -25,24 +25,12 @@ class CalculatorState extends State<CalculatorLanding>{
               child: Column(
                 children: <Widget>[
                   Expanded(
-                    child: ListView.builder(
-                      primary: false,
-                      itemCount: entries.length,
-                      itemBuilder: (BuildContext context, int index) =>
-                        Container(
-                          height: 50, 
-                          child: Align(
-                            alignment: Alignment.centerRight,
-                            child: Text(entries[index], style: TextStyle(color: Colors.black.withOpacity(0.5)))
-                          )
-                        )
-                    )
+                    child: CalculatorFormatting.getCalcEntries(entries)
                   ),
                   Align(
                     alignment: Alignment.bottomRight, 
                     child: Container( 
                       height: 50,
-                      color: Colors.amber[600], 
                       child: Text(_evalStmt)
                     )
                   ),

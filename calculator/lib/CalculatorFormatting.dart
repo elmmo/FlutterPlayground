@@ -19,6 +19,25 @@ class CalculatorFormatting {
     ); 
   }
 
+  static ListView getCalcEntries(List<String> entries) {
+    return ListView.builder( 
+      itemCount: entries.length, // how many items in list 
+      primary: false,            // whether to scroll when items fit within given space
+      itemBuilder: (BuildContext context, int index) => // generator 
+        Container(               // template for list item 
+          height: 50, 
+          child: Align(          // aligns text to the center right 
+            alignment: Alignment.centerRight,
+            // text style 
+            child: Text(
+              entries[index], 
+              style: TextStyle(color: Colors.black.withOpacity(0.5))
+            )
+          )
+        )
+    );
+  }
+
   static GridView getCalcButtonLayout(MaterialColor themeColor, Function onClick) =>
       (GridView.count(
           primary: false,
