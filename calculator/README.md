@@ -23,6 +23,6 @@ Things that I would refactor or improve upon if I was doing this all from scratc
 *expr &rarr; term termTail* \
 *termTail &rarr; addOp term termTail* \
 *factorTail &rarr; multOp factor factorTail* \ 
-*factor &rarr; √(expr) | (expr) | ^(expr)(expr) | number*  
+*factor &rarr; √(expr) | (expr) | ^(expr)(expr) | number* \
 *addOp &rarr; +|-* \
 *multOp &rarr; \*|/*
