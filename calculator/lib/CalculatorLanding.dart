@@ -8,8 +8,9 @@ class CalculatorLanding extends StatefulWidget {
 
 class CalculatorState extends State<CalculatorLanding>{
   bool _evaluate = false;
-  String _evalStmt = "";  
-  List<String> entries = new List();
+  String _evalStmt = "";                 // current statement 
+  List<String> _entries = new List();    // past statements 
+  List<String> _evalTokens = new List(); // the list of tokens
 
   @override 
   Widget build(BuildContext context) { 
@@ -25,7 +26,7 @@ class CalculatorState extends State<CalculatorLanding>{
               child: Column(
                 children: <Widget>[
                   Expanded(
-                    child: CalculatorFormatting.getCalcEntries(entries)
+                    child: CalculatorFormatting.getCalcEntries(_entries)
                   ),
                   Align(
                     alignment: Alignment.bottomRight, 
@@ -57,7 +58,7 @@ class CalculatorState extends State<CalculatorLanding>{
       break; 
       // if token indicates evaluation 
       case "=": {
-        entries.add(_evalStmt + "=");
+        _entries.add(_evalStmt + "=");
         print(_evalStmt);
         setState(() {
           _evaluate = true; 
@@ -69,7 +70,19 @@ class CalculatorState extends State<CalculatorLanding>{
       // make statement negative if positive and positive if already negative 
       case "+/-": {
         setState(() {
-          _evalStmt = (_evalStmt.substring(0, 1) == "-") ? _evalStmt.substring(1) : "-" + _evalStmt; 
+          if (_evalStmt.substring(0,1) == "-") {
+            _evalStmt = _evalStmt.substring(2, _evalStmt.length-1);
+            // could put in a regex but flutter doesn't have a removeAll function
+            _evalTokens.remove("-");
+            _evalTokens.remove("(");
+            _evalTokens.remove(")");
+          } else { 
+            _evalStmt = "-(" + _evalStmt + ")"; 
+            // need to do separately to provide proper tokens to the parser 
+            _evalTokens.insert(0, "-");
+            _evalTokens.insert(1, "(");
+            _evalTokens.add(")");
+          }
         }); 
         return true; 
       }
@@ -77,7 +90,7 @@ class CalculatorState extends State<CalculatorLanding>{
     }
     // if the input token is a number or an operator following a number 
     // case too complicated to put in switch 
-    RegExp nums = new RegExp(r"[0-9]"); 
+    RegExp nums = new RegExp(r"[0-9]|\)"); 
     if (nums.hasMatch(token) | (_evalStmt.length > 0 && nums.hasMatch(_evalStmt.substring(_evalStmt.length-1)))) { 
       setState(() {
         _evalStmt = (_evalStmt == "0" && nums.hasMatch(token)) ? token : _evalStmt += token; 
