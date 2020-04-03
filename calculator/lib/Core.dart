@@ -1,14 +1,20 @@
 import 'dart:math';
+// recursive descent parser for calculator language 
 
 class Core {
   List<ValueNode> exeList = new List<ValueNode>();
 
+  // entry point for the descent parser 
+  // would return double calculation in full implmentation
   double calculate(List tokens) {
     _program(tokens); 
     print("EXE LIST:");
-    print(exeList); 
+    for (int i = 0; i < exeList.length; i++) {
+      print(exeList[i].strValue);
+    }
   }
 
+  // create value node that update state and value 
   void _addValueNode(String strValue, [int intValue]) {
     ValueNode node = (intValue == null) ? new ValueNode(strValue, intValue) : new ValueNode(strValue); 
     exeList.add(node); 
@@ -17,9 +23,10 @@ class Core {
   // removes the first element of remaining arr
   void _consumeInputToken(String expected, List arr) {
     arr.removeAt(0);
-    print(expected + "consumed"); 
+    print(expected + " consumed"); 
   }
 
+  // ensures that the token to be consumed is the one we're looking for 
   void _match(String expected, List arr) {
     if (arr[0] == expected) {
       _consumeInputToken(expected, arr);
@@ -28,17 +35,14 @@ class Core {
     }
   }
   
-  // entry point for the recursive descent tree 
+  // start of the recursive descent parser 
   void _program(List arr) {
-    print("program called");
-    print(arr); 
     _stmtList(arr);
     _match("=", arr);
   }
 
+  // searching for list items after stmt 
   List _stmtList(List arr) {
-    print("stmtlist called");
-    print(arr); 
     String token = arr[0];
     if (token == "=") { // if nothing was entered 
       return arr; 
@@ -48,14 +52,14 @@ class Core {
     }
   }
 
+  // reference grammar 
   void _stmt(List arr) {
-    print("stmt called");
-    print(arr); 
     String token = arr[0];
+    // if negative expression 
     if (token == "-") {
-      _match("-", arr);
+      _match("-", arr);        // remove symbols 
       _match("one", arr);
-      _addValueNode("-1", -1);
+      _addValueNode("-1", -1); // replace symbols with executables 
       _addValueNode("*"); 
       _expr(arr);
     } else {
@@ -63,39 +67,40 @@ class Core {
     }
   }
 
+  // reference grammar 
   double _expr(List arr) {
-    print("expr called");
-    print(arr); 
     _term(arr);
-    if (arr.length > 1) _termTail(arr); 
+    if (arr.length > 1) _termTail(arr);   // checking if term_tail is possible
   }
 
+  // searching for list items after term 
   void _termTail(List arr) {
-    print("termtail called");
-    print(arr); 
-    _addOp(arr);
-    _term(arr);
-    _termTail(arr);
+    String token = arr[0];
+    if (token == "+" || token == "-") {
+      _addOp(arr);
+      _term(arr);
+      _termTail(arr);
+    }
   }
 
+  // reference grammar 
   void _term(List arr) {
-    print("term called");
-    print(arr); 
     _factor(arr);
     if (arr.length > 1) _factorTail(arr); 
   }
 
+  // searching for list items after factor 
   void _factorTail(List arr) {
-    print("factortail called");
-    print(arr); 
-    _multOp(arr); 
-    _factor(arr);
-    if (arr.length > 1) _factorTail(arr); 
+    String token = arr[0];
+    if (token == "*" || token == "/") {
+      _multOp(arr); 
+      _factor(arr);
+      _factorTail(arr);
+    }
   }
 
+  // base levle for translating grouped items into concrete expressions 
   void _factor(List arr) {
-    print("factor called");
-    print(arr); 
     String token = arr[0];
     if (token == "√") {           // evaluation of square root function 
       _match("√", arr);
@@ -117,46 +122,25 @@ class Core {
     }
   }
 
+  // reference grammar 
   void _addOp(List<String> arr) {
-    print("add op called");
     String token = arr[0];
-    if (token == "+" || token == "-") {
-      _match(token, arr); 
-      _addValueNode(token); 
-    }
+    _match(token, arr); 
+    _addValueNode(token); 
   }
 
+  // reference grammar 
   void _multOp(List<String> arr) {
-    print("Mult op claled");
     String token = arr[0];
-    if (token == "/" || token == "*") {
-      _match(token, arr);
-      _addValueNode(token); 
-    }
+    _match(token, arr);
+    _addValueNode(token); 
   }
 }
 
 class ValueNode {
   String strValue; 
-  int intValue;
+  int intState;
+  int intValue; 
 
   ValueNode(this.strValue, [this.intValue]);
-}
-
-void main() {
-  List<String> list = new List(); 
-  list.add("3");
-  list.add("+");
-  list.add("4");
-  list.add("+");
-  list.add("5");
-  list.add("x");
-  list.add("6");
-  list.add("/");
-  list.add("7");
-  list.add("+");
-  list.add("9");
-  list.add("=");
-  Core c = new Core(); 
-  c.calculate(list); 
 }

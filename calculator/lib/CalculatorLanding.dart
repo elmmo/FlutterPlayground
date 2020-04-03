@@ -47,6 +47,9 @@ class CalculatorState extends State<CalculatorLanding>{
 
   // responds to button clicks by updating state 
   bool updateEvaluation(String token) {
+    //// DEMO START ////
+    bool demoMode = true; 
+    //// DEMO END ////
     switch (token) { 
       // if token indicates clear 
       case "AC": {
@@ -58,11 +61,25 @@ class CalculatorState extends State<CalculatorLanding>{
       break; 
       // if token indicates evaluation 
       case "=": {
-        _entries.add(_evalStmt + "=");
+        // code for displaying the interface - for development purposes only
+        // DEMO START 
+        if (demoMode) {
+          int result = 0; 
+          if (_evalStmt == "3+4+5") result = 12; 
+          if (_evalStmt == "5*4") result = 20; 
+          if (_evalStmt == "12/4") result = 3; 
+          if (result == 0) result = int.tryParse(_evalStmt); 
+          _entries.add(_evalStmt + "=" + result.toString());
+          _evalStmt = result.toString(); 
+        // DEMO END 
+        } else {
+          _entries.add(_evalStmt + "=");
+          // _evalStmt = <calculate result of input>
+        }
         print(_evalStmt);
         setState(() {
           _evaluate = true; 
-          _evalStmt = "0";
+          _evalStmt = _evalStmt;
         }); 
         return true; 
       }
