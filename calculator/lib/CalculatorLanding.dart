@@ -74,13 +74,15 @@ class CalculatorState extends State<CalculatorLanding>{
             _evalStmt = _evalStmt.substring(2, _evalStmt.length-1);
             // could put in a regex but flutter doesn't have a removeAll function
             _evalTokens.remove("-");
+            _evalTokens.remove("one");
             _evalTokens.remove("(");
             _evalTokens.remove(")");
           } else { 
             _evalStmt = "-(" + _evalStmt + ")"; 
             // need to do separately to provide proper tokens to the parser 
             _evalTokens.insert(0, "-");
-            _evalTokens.insert(1, "(");
+            _evalTokens.insert(1, "one"); // uses the one identifier to prevent clashes with user input 
+            _evalTokens.insert(3, "(");
             _evalTokens.add(")");
           }
         }); 

@@ -56,7 +56,7 @@ class CalculatorFormatting {
             generateCalcButton("9", themeColor, 300, false, onClick),
             generateCalcButton("8", themeColor, 300, false, onClick),
             generateCalcButton("7", themeColor, 300, false, onClick),
-            generateCalcButton("x", themeColor, 100, true, onClick),
+            generateCalcButton("*", themeColor, 100, true, onClick),
             // row 2
             generateCalcButton("6", themeColor, 500, false, onClick),
             generateCalcButton("5", themeColor, 500, false, onClick),
