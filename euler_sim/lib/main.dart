@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'VisualComponents.dart';
+import 'Field.dart';
 
 void main() => runApp(EulerSim());
 
@@ -12,7 +12,7 @@ class EulerSim extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: VisualComponents(),
+      home: Field(),
     );
   }
 }
