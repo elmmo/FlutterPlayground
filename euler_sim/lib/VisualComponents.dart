@@ -8,12 +8,16 @@ class VisualComponents extends StatefulWidget {
 }
 
 class _VisualComponents extends State<VisualComponents> {
+  List<List<int>> edges; // adjacency matrix that keeps track of connections between nodes 
   List<Widget> nodes; 
+  int nodeCount; 
 
   @override
   void initState() {
     super.initState(); 
     nodes = new List<Widget>(); 
+    edges = new List<List<int>>(); 
+    nodeCount = 0; 
   }
 
   @override
@@ -42,11 +46,37 @@ class _VisualComponents extends State<VisualComponents> {
           // adds a node to the main visualization 
           setState(() {
             nodes.add(Node());
+            nodeCount++; 
+            addNodeToMatrix(); 
+            print("\n" + getMatrixString());
           })
         },
         tooltip: 'Increment',
         child: Icon(Icons.add),
       ),
     );
+  }
+
+  // adds a node to the adjacency matrix 
+  void addNodeToMatrix() {
+    for (int i = 0; i < nodeCount-1; i++) {
+      edges[i].add(0); 
+    }
+    edges.add(new List()); 
+    for (int i = 0; i < nodeCount; i++) {
+      edges[nodeCount-1].add(0); 
+    }
+  }
+
+  // returns a string representation of the adjacency matrix 
+  String getMatrixString() {
+    String result = ""; 
+    for (int i = 0; i < nodeCount; i++) {
+      for (int j = 0; j < nodeCount; j++) {
+        result += (edges[i][j]).toString() + " "; 
+      }
+      result += "\n";
+    }
+    return result; 
   }
 }
