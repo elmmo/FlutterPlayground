@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'dart:io';
 import 'LinePainter.dart';
 import 'Node.dart';
 
@@ -32,29 +31,14 @@ class _Field extends State<Field> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            // the display area for nodes 
-            Expanded(
-              child: Padding(
-                padding: EdgeInsets.fromLTRB(5, 50, 5, 5),
-                // line paint area 
-                child: ClipRect(
-                  child: CustomPaint(
-                    // nodes 
-                    child: SizedBox.expand(
-                      child: Stack(
-                        children: nodes.values.toList()
-                      )
-                    ),
-                    //painter: LinePainter(coordinates)
-                  ),
-                ),
-              )
-            ),
-            Container(color: Colors.green, height: 100, width: MediaQuery.of(context).size.width),
-          ],
+        child: GestureDetector(
+          // unless a button is tapped, don't block touch from gesture detector 
+          behavior: HitTestBehavior.translucent,
+          // if user taps out of connection, void it 
+          onTap: () {
+            if (connectNode != null) connectCallback(); 
+          },
+          child: createField(),
         ),
       ),
       floatingActionButton: FloatingActionButton(
@@ -123,4 +107,29 @@ class _Field extends State<Field> {
     }); 
   }
 
+  // creates the main view of the app 
+  Widget createField() {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: <Widget>[
+        // the display area for nodes 
+        Expanded(
+          child: Padding(
+            padding: EdgeInsets.fromLTRB(5, 50, 5, 5),
+            // line paint area 
+            child: ClipRect(
+              child: CustomPaint(
+                // nodes 
+                child: SizedBox.expand(
+                  child: Stack(
+                    children: nodes.values.toList()
+                    )
+                ),
+                //painter: LinePainter(coordinates)
+              ),
+            ),
+          )
+        ),
+        Container(color: Colors.green, height: 100, width: MediaQuery.of(context).size.width),
+    ],);}
 }
