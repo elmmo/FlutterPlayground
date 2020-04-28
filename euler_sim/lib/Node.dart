@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class Node extends StatefulWidget {
   final int id; 
   final Function startConnect; 
-  final Function voidConnect; 
+  final Function voidConnect;
 
   // constructor that passes connection information back to the parent 
   Node(this.id, this.startConnect, this.voidConnect); 
@@ -43,9 +43,7 @@ class _Node extends State<Node> {
       // listener on the node 
       child: GestureDetector(
             // trigger when node is dragged 
-            onTap: () {
-              toggleConnecting();  
-            },
+            onTap: () { toggleConnecting(); },
             onPanUpdate: (details) {
               setState(() {
                 position = Offset(position.dx + details.delta.dx, position.dy + details.delta.dy);

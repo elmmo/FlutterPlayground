@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:io';
+import 'LinePainter.dart';
 import 'Node.dart';
 
 class Field extends StatefulWidget {
@@ -9,20 +10,22 @@ class Field extends StatefulWidget {
 }
 
 class _Field extends State<Field> {
-  List<List<int>> edges; // adjacency matrix that keeps track of connections between nodes 
-  List<Widget> nodes;    // nodes displayed visually 
+  List<List<int>> edges; // adjacency matrix of connections between nodes 
+  List<List<Node>> coordinates; // edge representation for visuals 
+  Map<int, Widget> nodes;    // nodes displayed visually 
   int nodeCount;         // the number of nodes currently active 
   Node connectNode;     // the node initiating a connect
-  Function connectCallback; // a callback to communicate with the initial connection node 
+  Function connectCallback; // the callback for communicting to the connect initiator node 
 
   @override
   void initState() {
     super.initState(); 
-    nodes = new List<Widget>(); 
+    nodes = new Map<int, Widget>(); 
+    //coordinates = new Map<>(); 
     edges = new List<List<int>>(); 
     nodeCount = 0; 
-    connectNode = null; 
-    connectCallback = null; 
+    connectNode = null;  
+    connectCallback = null;
   }
 
   @override
@@ -36,10 +39,17 @@ class _Field extends State<Field> {
             Expanded(
               child: Padding(
                 padding: EdgeInsets.fromLTRB(5, 50, 5, 5),
-                child: SizedBox.expand(
-                  child: Stack(
-                    children: nodes
-                  )
+                // line paint area 
+                child: ClipRect(
+                  child: CustomPaint(
+                    // nodes 
+                    child: SizedBox.expand(
+                      child: Stack(
+                        children: nodes.values.toList()
+                      )
+                    ),
+                    //painter: LinePainter(coordinates)
+                  ),
                 ),
               )
             ),
@@ -51,7 +61,7 @@ class _Field extends State<Field> {
         onPressed: () => {
           // adds a node to the main visualization 
           setState(() {
-            nodes.add(Node(nodeCount, startConnect, voidConnect));
+            nodes[nodeCount] = Node(nodeCount, startConnect, voidConnect);
             nodeCount++; 
             addNodeToMatrix(); 
           })
@@ -93,10 +103,10 @@ class _Field extends State<Field> {
       // update adjacency matrix 
       setState(() {
         edges[connectNode.id][node.id] = 1; 
-        edges[node.id][connectNode.id] = 1; 
+        edges[node.id][connectNode.id] = 1;
+        callback(); 
+        connectCallback();
       });
-      connectCallback(); // for resetting the original connection node 
-      callback();        // for resetting the second connection node 
     } else {
       // start connection
       setState(() {
@@ -107,10 +117,10 @@ class _Field extends State<Field> {
   }
 
   // cancels the connection process that was started 
-  // id: the id of the node that triggered the connection 
   void voidConnect() {
     setState(() {
       connectNode = null; 
     }); 
   }
+
 }
