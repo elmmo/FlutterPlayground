@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'LinePainter.dart';
+import 'dart:math';
 import 'Node.dart';
 
 class Field extends StatefulWidget {
@@ -9,18 +10,25 @@ class Field extends StatefulWidget {
 }
 
 class _Field extends State<Field> {
+  // managing node relationships 
   List<List<int>> edges; // adjacency matrix of connections between nodes 
-  List<List<Node>> coordinates; // edge representation for visuals 
+  Map<int, Offset> coordinates; // edge representation for visuals 
+
+  // managing nodes 
   Map<int, Widget> nodes;    // nodes displayed visually 
-  int nodeCount;         // the number of nodes currently active 
+  int nodeCount;         // the number of nodes currently active
+  Random random;         // for generating node position randomly  
+
+  // managing connection process 
   Node connectNode;     // the node initiating a connect
   Function connectCallback; // the callback for communicting to the connect initiator node 
 
   @override
   void initState() {
     super.initState(); 
+    random = new Random(); 
     nodes = new Map<int, Widget>(); 
-    //coordinates = new Map<>(); 
+    coordinates = new Map<int, Offset>(); 
     edges = new List<List<int>>(); 
     nodeCount = 0; 
     connectNode = null;  
@@ -36,19 +44,24 @@ class _Field extends State<Field> {
           behavior: HitTestBehavior.translucent,
           // if user taps out of connection, void it 
           onTap: () {
-            if (connectNode != null) connectCallback(); 
+            if (connectNode != null) {
+              connectCallback();  // cancel on the node side 
+              voidConnect();      // cancel on the field side 
+            }
           },
           child: createField(),
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => {
+        onPressed: () {
+          double startX = random.nextDouble() * getScreenWidth(context, dividedBy: 2);
+          double startY = random.nextDouble() * getScreenHeight(context, dividedBy: 2);
           // adds a node to the main visualization 
           setState(() {
-            nodes[nodeCount] = Node(nodeCount, startConnect, voidConnect);
+            nodes[nodeCount] = Node(nodeCount, startConnect, Offset(startX, startY));
             nodeCount++; 
             addNodeToMatrix(); 
-          })
+          });
         },
         tooltip: 'Increment',
         child: Icon(Icons.add),
@@ -86,10 +99,14 @@ class _Field extends State<Field> {
     if (connectNode != null) {
       // update adjacency matrix 
       setState(() {
+        // register connection in adjacency matrix 
         edges[connectNode.id][node.id] = 1; 
         edges[node.id][connectNode.id] = 1;
+        // communicate completion back to the nodes 
         callback(); 
         connectCallback();
+        // complete on the field side 
+        voidConnect(); 
       });
     } else {
       // start connection
@@ -132,4 +149,12 @@ class _Field extends State<Field> {
         ),
         Container(color: Colors.green, height: 100, width: MediaQuery.of(context).size.width),
     ],);}
+
+    double getScreenHeight(BuildContext context, {dividedBy = 1}) {
+      return MediaQuery.of(context).size.height/dividedBy; 
+    }
+
+    double getScreenWidth(BuildContext context, {dividedBy = 1}) {
+      return MediaQuery.of(context).size.width/dividedBy; 
+    }
 }

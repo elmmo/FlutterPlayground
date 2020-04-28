@@ -3,10 +3,10 @@ import 'package:flutter/material.dart';
 class Node extends StatefulWidget {
   final int id; 
   final Function startConnect; 
-  final Function voidConnect;
+  final Offset startPosition; 
 
   // constructor that passes connection information back to the parent 
-  Node(this.id, this.startConnect, this.voidConnect); 
+  Node(this.id, this.startConnect, this.startPosition); 
 
   @override
   _Node createState() => _Node();
@@ -19,7 +19,7 @@ class _Node extends State<Node> {
   @override
   void initState() {
     super.initState(); 
-    position = Offset.zero;
+    position = this.widget.startPosition;  
     connecting = false; 
   }
 
@@ -59,7 +59,7 @@ class _Node extends State<Node> {
     setState(() {
       connecting = (connecting) ? false : true;
     });
-    (connecting) ? this.widget.startConnect(this.widget, toggleConnecting) : this.widget.voidConnect(); 
+    if (connecting) this.widget.startConnect(this.widget, toggleConnecting);
   }
 
 }
