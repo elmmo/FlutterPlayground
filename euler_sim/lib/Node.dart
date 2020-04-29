@@ -4,9 +4,10 @@ class Node extends StatefulWidget {
   final int id; 
   final Function startConnect; 
   final Offset startPosition; 
+  final Function onDrag; 
 
   // constructor that passes connection information back to the parent 
-  Node(this.id, this.startConnect, this.startPosition); 
+  Node(this.id, this.startConnect, this.startPosition, this.onDrag); 
 
   @override
   _Node createState() => _Node();
@@ -48,6 +49,7 @@ class _Node extends State<Node> {
               setState(() {
                 position = Offset(position.dx + details.delta.dx, position.dy + details.delta.dy);
               });
+              this.widget.onDrag(this.widget, position); 
             },
             child: circle,
           ),
@@ -59,7 +61,7 @@ class _Node extends State<Node> {
     setState(() {
       connecting = (connecting) ? false : true;
     });
-    if (connecting) this.widget.startConnect(this.widget, toggleConnecting);
+    if (connecting) this.widget.startConnect(this.widget, position, toggleConnecting);
   }
 
 }

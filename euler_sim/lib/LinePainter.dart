@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'Node.dart';
 
 class LinePainter extends CustomPainter {
-  List<List<Node>> coordinates; 
+  List<List<Offset>> coordinates; 
 
   LinePainter(this.coordinates);
 
@@ -10,9 +9,9 @@ class LinePainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
       ..color = Colors.black
-      ..strokeWidth = 2; 
+      ..strokeWidth = 3; 
     for (int i = 0; i < coordinates.length; i++) {
-      //canvas.drawLine(coordinates[i][0].position, coordinates[i][1], paint);
+      canvas.drawLine(coordinates[i][0], coordinates[i][1], paint);
     };
   }
 
