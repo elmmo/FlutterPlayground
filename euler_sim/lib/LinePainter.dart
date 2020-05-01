@@ -7,13 +7,14 @@ class LinePainter extends CustomPainter {
 
   @override 
   void paint(Canvas canvas, Size size) {
-    print("paint triggered");
     final paint = Paint()
       ..color = Colors.black
       ..strokeWidth = 3; 
-    for (int i = 0; i < coordinates.length; i++) {
-      canvas.drawLine(coordinates[i][0], coordinates[i][1], paint);
-    };
+    if (coordinates.length > 0) {
+      for (int i = 0; i < coordinates.length; i++) {
+        canvas.drawLine(coordinates[i][0], coordinates[i][1], paint);
+      };
+    }
   }
 
   @override 

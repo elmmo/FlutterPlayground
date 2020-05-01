@@ -34,6 +34,7 @@ class _Field extends State<Field> {
 
   @override
   Widget build(BuildContext context) {
+    print(edges); 
     return Scaffold(
       body: Center(
         child: GestureDetector(
@@ -42,7 +43,6 @@ class _Field extends State<Field> {
           // if user taps out of connection, void it 
           onTap: () {
             if (edges.length > 0 && !edges[edges.length-1].complete) {
-              edges.removeLast(); // cancel on the node side 
               voidConnect();      // cancel on the field side 
             }
           },
@@ -97,19 +97,24 @@ class _Field extends State<Field> {
   void startConnect(Node node, Offset position, Function callback) {
     if (edges.length > 0 && !edges[edges.length-1].complete) {
       Edge latestEdge = edges[edges.length-1]; 
-      // register connection in edge list 
-      latestEdge.addNode(node, getAdjustedPosition(position), callback);
-      // communicate completion back to the nodes 
-      latestEdge.closeConnection();
-      List<int> ids = latestEdge.getIds(mustBeComplete: true); 
-      // update adjacency matrix 
-      setState(() {
-        // register connection in adjacency matrix 
-        matrix[ids[0]][ids[1]] = 1; 
-        matrix[ids[1]][ids[0]] = 1;
-      });
-      // update visuals 
-      updateDrawingCoordinates(); 
+      // check if self-edge 
+      if (latestEdge.nodes[0] == node) {
+        voidConnect(); 
+      } else {
+        // register connection in edge list 
+        latestEdge.addNode(node, getAdjustedPosition(position), callback);
+        // communicate completion back to the nodes 
+        latestEdge.closeConnection();
+        List<int> ids = latestEdge.getIds(mustBeComplete: true); 
+        // update adjacency matrix 
+        setState(() {
+          // register connection in adjacency matrix 
+          matrix[ids[0]][ids[1]] = 1; 
+          matrix[ids[1]][ids[0]] = 1;
+        });
+        // update visuals 
+        updateDrawingCoordinates(); 
+      }
     } else {
       // start connection
       setState(() {
@@ -141,7 +146,6 @@ class _Field extends State<Field> {
   void updateDrawingCoordinates() {
     List<List<Offset>> newCoordinates = new List(); 
     for (int i = 0; i < edges.length; i++) {
-      print(coordinates); 
       newCoordinates.add(edges[i].locations.values.toList());
     }
 
