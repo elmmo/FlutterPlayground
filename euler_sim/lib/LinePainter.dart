@@ -13,7 +13,7 @@ class LinePainter extends CustomPainter {
     if (coordinates.length > 0) {
       for (int i = 0; i < coordinates.length; i++) {
         canvas.drawLine(coordinates[i][0], coordinates[i][1], paint);
-      };
+      }
     }
   }
 

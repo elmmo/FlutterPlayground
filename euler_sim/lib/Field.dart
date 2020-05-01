@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'LinePainter.dart';
 import 'dart:math';
 import 'Node.dart';
@@ -20,6 +21,7 @@ class _Field extends State<Field> {
   Map<int, Widget> nodes;    // nodes displayed visually 
   int nodeCount;         // the number of nodes currently active
   Random random;         // for generating node position randomly  
+  Node focusNode;        // the last node clicked on 
 
   @override
   void initState() {
@@ -30,11 +32,11 @@ class _Field extends State<Field> {
     matrix = new List<List<int>>(); 
     coordinates = new List<List<Offset>>(); 
     nodeCount = 0; 
+    focusNode = null; 
   }
 
   @override
   Widget build(BuildContext context) {
-    print(edges); 
     return Scaffold(
       body: Center(
         child: GestureDetector(
@@ -48,22 +50,6 @@ class _Field extends State<Field> {
           },
           child: createField(),
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          // randomly determine where on the screen the node will start 
-          double startX = random.nextDouble() * getScreenWidth(context, dividedBy: 2);
-          double startY = random.nextDouble() * getScreenHeight(context, dividedBy: 2);
-          Offset offsetPosition = Offset(startX, startY);
-          // adds a node to the main visualization 
-          setState(() {
-            nodes[nodeCount] = Node(nodeCount, startConnect, offsetPosition, onDrag);
-            nodeCount++; 
-            addNodeToMatrix(); 
-          });
-        },
-        tooltip: 'Increment',
-        child: Icon(Icons.add),
       ),
     );
   }
@@ -82,13 +68,16 @@ class _Field extends State<Field> {
 
   // returns a string representation of the adjacency matrix 
   String getMatrixString() {
-    String result = ""; 
+    String result = "["; 
     for (int i = 0; i < nodeCount; i++) {
+      result += "[";
       for (int j = 0; j < nodeCount; j++) {
-        result += (matrix[i][j]).toString() + " "; 
+        result += (matrix[i][j]).toString(); 
+        if (j < nodeCount-1) result += ",";
       }
-      result += "\n";
+      result += "],\n";
     }
+    result += "]";
     return result; 
   }
 
@@ -159,6 +148,29 @@ class _Field extends State<Field> {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
+        // button for help 
+        Row(
+          children: <Widget>[
+            Expanded(
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(0, 50, 30, 0),
+                child: Container(height: 50, width: 50,
+                  child: Align(
+                    alignment: Alignment.centerRight,
+                    child: IconButton(
+                      icon: Icon(Icons.info),
+                      tooltip: "Help", 
+                      iconSize: 34, 
+                      color: Colors.grey[400],
+                      onPressed: () {
+                        print("Hello World");
+                      }
+                    )
+                  ))
+              )
+            )
+          ]
+        ),
         // the display area for nodes 
         Expanded(
           child: Padding(
@@ -177,7 +189,36 @@ class _Field extends State<Field> {
             ),
           )
         ),
-        Container(color: Colors.green, height: 100, width: MediaQuery.of(context).size.width),
+        // status bar 
+        Row(
+          children: <Widget>[
+            Container(color: Colors.green, height: getScreenHeight(context, dividedBy: 20), width: 50)
+          ]
+        ),
+        // buttons for working with the nodes 
+        Padding(
+          padding: EdgeInsets.fromLTRB(20, 0, 20, 60),
+          child: Container(
+            decoration: BoxDecoration(
+              border: Border(
+                top: BorderSide(width: 1.0, color: Colors.grey[300]),
+                left: BorderSide(width: 5.0, color: Colors.grey[700]),
+                right: BorderSide(width: 5.0, color: Colors.grey[700]),
+                bottom: BorderSide(width: 1.0, color: Colors.grey[300]),
+              )
+            ),
+            child: ButtonBar(
+              alignment: MainAxisAlignment.spaceEvenly, 
+              children: <Widget>[
+                IconButton(icon: Icon(Icons.add), onPressed: addNode), 
+                IconButton(icon: Icon(Icons.delete), onPressed: (focusNode == null) ? clearScreen : deleteNode), 
+                IconButton(icon: Icon(Icons.content_copy), onPressed: copyMatrixToClipboard), 
+                IconButton(icon: Icon(Icons.input), onPressed: () {print("Hello World");}), 
+              ],
+            ),
+          )
+        ),
+        //Container(color: Colors.green, height: 70, width: MediaQuery.of(context).size.width),
     ],);}
 
     double getScreenHeight(BuildContext context, {dividedBy = 1}) {
@@ -186,5 +227,75 @@ class _Field extends State<Field> {
 
     double getScreenWidth(BuildContext context, {dividedBy = 1}) {
       return MediaQuery.of(context).size.width/dividedBy; 
+    }
+
+    void addNode() {
+      // randomly determine where on the screen the node will start 
+      double startX = random.nextDouble() * getScreenWidth(context, dividedBy: 2);
+      double startY = random.nextDouble() * getScreenHeight(context, dividedBy: 2);
+      Offset offsetPosition = Offset(startX, startY);
+        // adds a node to the main visualization 
+        setState(() {
+          nodes[nodeCount] = Node(nodeCount, startConnect, offsetPosition, onDrag, setFocus);
+          nodeCount++; 
+          addNodeToMatrix(); 
+      });
+    }
+
+    // resets the field
+    void clearScreen() {
+      if (nodes.length > 0) {
+        setState(() {
+          nodes.clear();
+          edges.clear();
+          matrix.clear(); 
+          coordinates.clear(); 
+          nodeCount = 0; 
+        });
+      }
+    }
+
+    void deleteNode() {
+      bool repaint = false; 
+      List<Edge> edgesToRemove = new List(); 
+      if (focusNode != null) {
+          // detects edges that contain the focus node 
+          edges.forEach((Edge e) {
+            if (e.edgeContains(focusNode)) {
+              edgesToRemove.add(e); 
+              repaint = true; 
+              if (e.complete) {
+                List ids = e.getIds(mustBeComplete: false);  
+                // resets each connection in the matrix related to the given node
+                matrix[ids[0]][ids[1]] = 0; 
+                matrix[ids[1]][ids[0]] = 0; 
+              }
+            }
+          });
+        }
+      // removes edges that were connected to the deleted node 
+      edgesToRemove.forEach((Edge e) {
+        edges.remove(e); 
+      });
+      edges.removeLast();   // accounts for the edge created by clicking the node
+      setState(() {
+        // removes the node itself from the list and clears focusNode
+        nodes.remove(focusNode.id);
+        focusNode = null;
+        // if edges have been deleted, update drawing coordinates 
+        if (repaint) {
+          updateDrawingCoordinates();
+        }
+      });
+    }
+
+    void copyMatrixToClipboard() {
+      Clipboard.setData(ClipboardData(text: getMatrixString()));
+      print(Clipboard.getData(''));
+    }
+
+    // sets the focus node to the node that has been clicked last 
+    void setFocus(Node node) {
+      focusNode = node;
     }
 }

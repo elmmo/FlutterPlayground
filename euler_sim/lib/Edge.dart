@@ -36,6 +36,10 @@ class Edge {
     }
   }
 
+  bool edgeContains(Node node) {
+    return nodes.contains(node); 
+  }
+
   List<int> getIds({bool mustBeComplete}) {
     List<int> ids = new List(); 
     for (int i = 0; i < nodes.length; i++) {
