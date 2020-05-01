@@ -7,6 +7,7 @@ class LinePainter extends CustomPainter {
 
   @override 
   void paint(Canvas canvas, Size size) {
+    print("paint triggered");
     final paint = Paint()
       ..color = Colors.black
       ..strokeWidth = 3; 

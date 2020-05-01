@@ -127,9 +127,12 @@ class _Field extends State<Field> {
 
   // triggered every time node is dragged and updates coordinates 
   void onDrag(Node node, Offset position) {
-    
-    // setState(() {
-    // }); 
+    for (int i = 0; i < edges.length; i++) {
+      if (edges[i].nodes.contains(node)) {
+        edges[i].setLocation(node, getAdjustedPosition(position));
+      }
+    }
+    updateDrawingCoordinates(); 
   }
 
   // adjusts the line position to account for the difference between the circle center and the true offset 
@@ -138,8 +141,10 @@ class _Field extends State<Field> {
   void updateDrawingCoordinates() {
     List<List<Offset>> newCoordinates = new List(); 
     for (int i = 0; i < edges.length; i++) {
+      print(coordinates); 
       newCoordinates.add(edges[i].locations.values.toList());
     }
+
     setState(() {
       coordinates = newCoordinates; 
     }); 
