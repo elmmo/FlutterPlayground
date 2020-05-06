@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'LinePainter.dart';
 import 'dart:math';
+import 'LinePainter.dart';
+import 'EulerLogic.dart';
 import 'Node.dart';
 import 'Edge.dart';
 
@@ -24,7 +25,7 @@ class _Field extends State<Field> {
   Node focusNode;        // the last node clicked on 
 
   // managing graph relationships 
-  bool complete; 
+  bool connected; 
 
   @override
   void initState() {
@@ -36,7 +37,7 @@ class _Field extends State<Field> {
     coordinates = new List<List<Offset>>(); 
     nodeCount = 0; 
     focusNode = null; 
-    complete = false; 
+    connected = false; 
   }
 
   @override
@@ -48,7 +49,7 @@ class _Field extends State<Field> {
           behavior: HitTestBehavior.translucent,
           // if user taps out of connection, void it 
           onTap: () {
-            if (edges.length > 0 && !edges[edges.length-1].complete) {
+            if (edges.length > 0 && !edges[edges.length-1].connected) {
               voidConnect();      // cancel on the field side 
             }
           },
@@ -88,31 +89,30 @@ class _Field extends State<Field> {
   // connects one node to another 
   // id: the id of the node that triggered the connection 
   void startConnect(Node node, Offset position, Function callback) {
-    if (edges.length > 0 && !edges[edges.length-1].complete) {
+    if (edges.length > 0 && !edges[edges.length-1].connected) {
       Edge latestEdge = edges[edges.length-1]; 
       // check if self-edge 
       if (latestEdge.nodes[0] == node) {
         voidConnect(); 
       } else {
-        // register connection in edge list 
+        // register connection on field side
         latestEdge.addNode(node, getAdjustedPosition(position), callback);
         // communicate completion back to the nodes 
         latestEdge.closeConnection();
-        List<int> ids = latestEdge.getIds(mustBeComplete: true); 
+        List<int> ids = latestEdge.getIds(mustBeconnected: true); 
         // update adjacency matrix 
         setState(() {
           // register connection in adjacency matrix 
           matrix[ids[0]][ids[1]] = 1; 
           matrix[ids[1]][ids[0]] = 1;
         });
-        // check against graph patterns 
-        setState(() {
-          if (edges.length == 6) {
-            complete = true; 
-          }
-        });
         // update visuals 
         updateDrawingCoordinates(); 
+        // check against graph patterns 
+        setState(() {
+          connected = isConnected(matrix, excludeZeroDeg: false);
+        });
+        focusNode = null; 
       }
     } else {
       // start connection
@@ -124,6 +124,7 @@ class _Field extends State<Field> {
 
   // cancels the connection process that was started 
   void voidConnect() {
+    focusNode = null; 
     setState(() {
       edges.removeLast();
     }); 
@@ -206,8 +207,14 @@ class _Field extends State<Field> {
             child: ButtonBar(
               alignment: MainAxisAlignment.spaceEvenly, 
               children: <Widget>[
-                OutlineButton(child: Text("Complete"), highlightedBorderColor: Colors.green, onPressed: (complete) ? go : null),
-                OutlineButton(child: Text("Euler Cycle"), highlightedBorderColor: Colors.green,),
+                OutlineButton(
+                  child: Text("Connected"), 
+                  highlightedBorderColor: Colors.green, 
+                  onPressed: (connected) ? go : null),
+                OutlineButton(
+                  child: Text("Euler Cycle"), 
+                  highlightedBorderColor: Colors.green,
+                  ),
                 OutlineButton(child: Text("Euler Trail"), highlightedBorderColor: Colors.green,),
               ],
             ),
@@ -251,23 +258,28 @@ class _Field extends State<Field> {
       double startX = random.nextDouble() * getScreenWidth(context, dividedBy: 2);
       double startY = random.nextDouble() * getScreenHeight(context, dividedBy: 2);
       Offset offsetPosition = Offset(startX, startY);
-        // adds a node to the main visualization 
+      nodes[nodeCount] = Node(nodeCount, startConnect, offsetPosition, onDrag, setFocus);
+      nodeCount++; 
+      // adds a node to the main visualization 
+      if (nodes.length > 1) {
         setState(() {
-          nodes[nodeCount] = Node(nodeCount, startConnect, offsetPosition, onDrag, setFocus);
-          nodeCount++; 
           addNodeToMatrix(); 
-      });
+            connected = isConnected(matrix, excludeZeroDeg: false); 
+        });
+      }
     }
 
     // resets the field
     void clearScreen() {
       if (nodes.length > 0) {
+        nodes.clear();
+        edges.clear();
+        matrix.clear(); 
+        coordinates.clear(); 
+        nodeCount = 0; 
+        connected = false; 
         setState(() {
-          nodes.clear();
-          edges.clear();
-          matrix.clear(); 
-          coordinates.clear(); 
-          nodeCount = 0; 
+          updateDrawingCoordinates();
         });
       }
     }
@@ -281,8 +293,8 @@ class _Field extends State<Field> {
             if (e.edgeContains(focusNode)) {
               edgesToRemove.add(e); 
               repaint = true; 
-              if (e.complete) {
-                List ids = e.getIds(mustBeComplete: false);  
+              if (e.connected) {
+                List ids = e.getIds(mustBeconnected: false);  
                 // resets each connection in the matrix related to the given node
                 matrix[ids[0]][ids[1]] = 0; 
                 matrix[ids[1]][ids[0]] = 0; 
@@ -317,7 +329,7 @@ class _Field extends State<Field> {
     }
 
     LinePainter getLinePainter() {
-      return new LinePainter(complete, coordinates);
+      return new LinePainter(connected, coordinates);
     }
 
     void go() {

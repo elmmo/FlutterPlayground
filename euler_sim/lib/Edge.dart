@@ -5,7 +5,7 @@ class Edge {
   List<Node> nodes; 
   Map<Node, Offset> locations;
   List<Function> callbacks;
-  bool complete; 
+  bool connected; 
 
   Edge(Node node, Offset location, Function callback) {
     nodes = new List(); 
@@ -14,7 +14,7 @@ class Edge {
     setLocation(node, location); 
     callbacks = new List(); 
     callbacks.add(callback); 
-    complete = false; 
+    connected = false; 
   }
 
   void addNode(Node node, Offset location, Function callback) {
@@ -22,7 +22,7 @@ class Edge {
       nodes.add(node);
       setLocation(node, location); 
       callbacks.add(callback); 
-      complete = true; 
+      connected = true; 
     }
   }
 
@@ -40,14 +40,14 @@ class Edge {
     return nodes.contains(node); 
   }
 
-  List<int> getIds({bool mustBeComplete}) {
+  List<int> getIds({bool mustBeconnected}) {
     List<int> ids = new List(); 
     for (int i = 0; i < nodes.length; i++) {
       ids.add(nodes[i].id);
     }
-    // check if completeness matters 
-    if (mustBeComplete) {
-      return (complete) ? ids : null; 
+    // check if connectedness matters 
+    if (mustBeconnected) {
+      return (connected) ? ids : null; 
     } else {
       return ids; 
     }

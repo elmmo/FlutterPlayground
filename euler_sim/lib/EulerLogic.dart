@@ -1,16 +1,3 @@
-List<List<int>> g = 
-[[0,1,1,0,1,0],
-[1,0,1,0,1,0],
-[1,1,0,0,1,0],
-[0,0,0,0,0,0],
-[1,1,1,0,0,0],
-[0,0,0,0,0,0],
-];
-
-main() {
-  print(getNodeDegrees(g)); 
-}
-
 // checks if the entire graph in the adjacency matrix is connected 
 // @param g - the adjacency matrix to examine 
 // @param excludeZeroDeg - whether to find connectedness excluding nodes with zero edges 
@@ -21,7 +8,7 @@ List getConnected(List<List<int>> g, {bool excludeZeroDeg}) {
   // traverse first row and explore adjacent vertices 
   for (int i = 0; i < g.length; i++) {
     if (g[0][i] == 1) {
-      check(i, visited); 
+      check(g, i, visited); 
     }
   }
   // sum visited list, should total the number of nodes if connected 
@@ -34,14 +21,15 @@ List getConnected(List<List<int>> g, {bool excludeZeroDeg}) {
 }
 
 // recursive helper function that marks visited nodes 
+// @param g - the adjacency matrix 
 // @param row - the adjacent node to examine 
 // @param visited - list of visited nodes to update 
-void check(int row, List visited) {
+void check(List<List<int>> g, int row, List visited) {
   visited[row] = 1; 
   for (int i = 0; i < g.length; i++) {
     // if adjacent neighbor is not yet visited
     if (visited[i] == 0 && g[row][i] == 1) {
-      check(i, visited); 
+      check(g, i, visited); 
     }
   }
 }
