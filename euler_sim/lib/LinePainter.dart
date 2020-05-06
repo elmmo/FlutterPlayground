@@ -4,12 +4,11 @@ class LinePainter extends CustomPainter {
   bool highlight; 
   List<List<Offset>> coordinates; 
 
-  LinePainter(bool highlight, this.coordinates);
+  LinePainter(this.highlight, this.coordinates);
 
   @override 
   void paint(Canvas canvas, Size size) {
-    Color paintIt = Colors.black; 
-    if (highlight != null) paintIt = Colors.red;
+    Color paintIt = (highlight) ? Colors.blue : Colors.black; 
     final paint = Paint()
       ..color = paintIt
       ..strokeWidth = 3; 

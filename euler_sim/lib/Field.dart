@@ -26,6 +26,7 @@ class _Field extends State<Field> {
 
   // managing graph relationships 
   bool connected; 
+  bool highlight; // for highlighting graph relationships 
 
   @override
   void initState() {
@@ -38,6 +39,7 @@ class _Field extends State<Field> {
     nodeCount = 0; 
     focusNode = null; 
     connected = false; 
+    highlight = false; 
   }
 
   @override
@@ -58,6 +60,23 @@ class _Field extends State<Field> {
       ),
     );
   }
+
+    void addNode() {
+      // randomly determine where on the screen the node will start 
+      double startX = random.nextDouble() * getScreenWidth(context, dividedBy: 2);
+      double startY = random.nextDouble() * getScreenHeight(context, dividedBy: 2);
+      Offset offsetPosition = Offset(startX, startY);
+      nodes[nodeCount] = Node(nodeCount, startConnect, offsetPosition, onDrag, setFocus);
+      nodeCount++; 
+      highlight = false; 
+      // adds a node to the main visualization
+      addNodeToMatrix();  
+      if (nodes.length > 1) {
+        setState(() {
+          connected = isConnected(matrix, excludeZeroDeg: false); 
+        });
+      }
+    }
 
   // adds a node to the adjacency matrix 
   void addNodeToMatrix() {
@@ -137,18 +156,20 @@ class _Field extends State<Field> {
         edges[i].setLocation(node, getAdjustedPosition(position));
       }
     }
+    highlight = false; 
     updateDrawingCoordinates(); 
   }
 
   // adjusts the line position to account for the difference between the circle center and the true offset 
   Offset getAdjustedPosition(Offset position) => Offset(position.dx+25, position.dy+25);
 
+  // adjusts the coordinates for drawing edges between the nodes 
   void updateDrawingCoordinates() {
     List<List<Offset>> newCoordinates = new List(); 
     for (int i = 0; i < edges.length; i++) {
+      // gets the new coordinates directly from the edge 
       newCoordinates.add(edges[i].locations.values.toList());
     }
-
     setState(() {
       coordinates = newCoordinates; 
     }); 
@@ -209,13 +230,13 @@ class _Field extends State<Field> {
               children: <Widget>[
                 OutlineButton(
                   child: Text("Connected"), 
-                  highlightedBorderColor: Colors.green, 
-                  onPressed: (connected) ? go : null),
+                  highlightedBorderColor: Colors.blue, 
+                  onPressed: (connected) ? highlightRelationship : null),
                 OutlineButton(
                   child: Text("Euler Cycle"), 
-                  highlightedBorderColor: Colors.green,
+                  highlightedBorderColor: Colors.blue,
                   ),
-                OutlineButton(child: Text("Euler Trail"), highlightedBorderColor: Colors.green,),
+                OutlineButton(child: Text("Euler Trail"), highlightedBorderColor: Colors.blue,),
               ],
             ),
           )
@@ -245,28 +266,14 @@ class _Field extends State<Field> {
         ),
     ],);}
 
+    // for responsive sizing - height 
     double getScreenHeight(BuildContext context, {dividedBy = 1}) {
       return MediaQuery.of(context).size.height/dividedBy; 
     }
 
+    // for responsive sizing - width 
     double getScreenWidth(BuildContext context, {dividedBy = 1}) {
       return MediaQuery.of(context).size.width/dividedBy; 
-    }
-
-    void addNode() {
-      // randomly determine where on the screen the node will start 
-      double startX = random.nextDouble() * getScreenWidth(context, dividedBy: 2);
-      double startY = random.nextDouble() * getScreenHeight(context, dividedBy: 2);
-      Offset offsetPosition = Offset(startX, startY);
-      nodes[nodeCount] = Node(nodeCount, startConnect, offsetPosition, onDrag, setFocus);
-      nodeCount++; 
-      // adds a node to the main visualization 
-      if (nodes.length > 1) {
-        setState(() {
-          addNodeToMatrix(); 
-            connected = isConnected(matrix, excludeZeroDeg: false); 
-        });
-      }
     }
 
     // resets the field
@@ -284,6 +291,7 @@ class _Field extends State<Field> {
       }
     }
 
+    // deletes an individual node from the screen
     void deleteNode() {
       bool repaint = false; 
       List<Edge> edgesToRemove = new List(); 
@@ -318,9 +326,9 @@ class _Field extends State<Field> {
       });
     }
 
+    // copies a string representation of the adjacency matrix to the clipboard 
     void copyMatrixToClipboard() {
       Clipboard.setData(ClipboardData(text: getMatrixString()));
-      print(Clipboard.getData(''));
     }
 
     // sets the focus node to the node that has been clicked last 
@@ -328,12 +336,17 @@ class _Field extends State<Field> {
       focusNode = node;
     }
 
+    // returns a new line painter based on the current state 
     LinePainter getLinePainter() {
-      return new LinePainter(connected, coordinates);
+      return new LinePainter(highlight, coordinates);
     }
 
-    void go() {
-      print("Hello World");
+    void highlightRelationship() {
+      if (connected) {
+        setState(() {
+        highlight = true; 
+      });
+      }
     }
 }
 
