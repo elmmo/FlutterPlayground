@@ -23,6 +23,9 @@ class _Field extends State<Field> {
   Random random;         // for generating node position randomly  
   Node focusNode;        // the last node clicked on 
 
+  // managing graph relationships 
+  bool complete; 
+
   @override
   void initState() {
     super.initState(); 
@@ -33,6 +36,7 @@ class _Field extends State<Field> {
     coordinates = new List<List<Offset>>(); 
     nodeCount = 0; 
     focusNode = null; 
+    complete = false; 
   }
 
   @override
@@ -100,6 +104,12 @@ class _Field extends State<Field> {
           // register connection in adjacency matrix 
           matrix[ids[0]][ids[1]] = 1; 
           matrix[ids[1]][ids[0]] = 1;
+        });
+        // check against graph patterns 
+        setState(() {
+          if (edges.length == 6) {
+            complete = true; 
+          }
         });
         // update visuals 
         updateDrawingCoordinates(); 
@@ -184,16 +194,24 @@ class _Field extends State<Field> {
                     children: nodes.values.toList()
                     )
                 ),
-                painter: LinePainter(coordinates)
+                painter: getLinePainter(),
               ),
             ),
           )
         ),
         // status bar 
-        Row(
-          children: <Widget>[
-            Container(color: Colors.green, height: getScreenHeight(context, dividedBy: 20), width: 50)
-          ]
+        Padding(
+          padding: EdgeInsets.fromLTRB(20, 0, 20, 5),
+          child: Container(
+            child: ButtonBar(
+              alignment: MainAxisAlignment.spaceEvenly, 
+              children: <Widget>[
+                OutlineButton(child: Text("Complete"), highlightedBorderColor: Colors.green, onPressed: (complete) ? go : null),
+                OutlineButton(child: Text("Euler Cycle"), highlightedBorderColor: Colors.green,),
+                OutlineButton(child: Text("Euler Trail"), highlightedBorderColor: Colors.green,),
+              ],
+            ),
+          )
         ),
         // buttons for working with the nodes 
         Padding(
@@ -218,7 +236,6 @@ class _Field extends State<Field> {
             ),
           )
         ),
-        //Container(color: Colors.green, height: 70, width: MediaQuery.of(context).size.width),
     ],);}
 
     double getScreenHeight(BuildContext context, {dividedBy = 1}) {
@@ -298,4 +315,13 @@ class _Field extends State<Field> {
     void setFocus(Node node) {
       focusNode = node;
     }
+
+    LinePainter getLinePainter() {
+      return new LinePainter(complete, coordinates);
+    }
+
+    void go() {
+      print("Hello World");
+    }
 }
+
