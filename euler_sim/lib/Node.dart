@@ -35,7 +35,12 @@ class _Node extends State<Node> {
       decoration: new BoxDecoration(
         shape: BoxShape.circle, 
         color: ((connecting) ? Colors.blue : Colors.black),
-      )
+      ),
+      // label the node 
+      child: Center(child: Text(
+        this.widget.id.toString(), 
+        style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)
+      )),
     ); 
     // positioning the node on a coordinate grid within the stack 
     return Positioned(

@@ -70,6 +70,9 @@ class _Field extends State<Field> {
       nodeCount++; 
       highlight = false; 
       // adds a node to the main visualization
+      setState(() {
+        addNodeToMatrix();  
+      });
       addNodeToMatrix();  
       if (nodes.length > 1) {
         setState(() {
@@ -341,11 +344,12 @@ class _Field extends State<Field> {
       return new LinePainter(highlight, coordinates);
     }
 
+    // highlights the relationship between the given nodes 
     void highlightRelationship() {
       if (connected) {
         setState(() {
-        highlight = true; 
-      });
+          highlight = true; 
+        });
       }
     }
 }
